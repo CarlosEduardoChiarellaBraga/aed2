@@ -1,0 +1,14 @@
+MST_Kruskal(Edges, V, E){
+    e=0, i=0
+    sum=0
+    Sort(Edges)
+    while(e<V-1):
+        u=Edges[i].u
+        v=Edges[i].v
+        if(Adding edge {u, v} do not form cycle){
+            Print(Adding edge {u, v} to MST)
+            sum+=Edges[i].weight
+            e+=1
+        }
+        i+=1
+}
