@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//Estrutura para o Union-Find, armzenando o pai e o valor da aresta
+//Estrutura para o Union-Find, armzenando o pai e o valor da ares
 struct Subset {
     int parent;
     int rank;
@@ -12,25 +12,28 @@ struct Edge {
     int From, To, weight;
 };
 
+struct Subset* subsets; 
+struct Edge* edges;      
+
 // Criação e alocação do grafo
-struct Edge* createGraph(int V, int E) {
+struct Edge* createGraph(int E) {
     struct Edge* graph = (struct Edge*)malloc(E * sizeof(struct Edge));
     return graph;
 }
 
 // Função usada para localizar um vértice
-int Find(struct Subset subsets[], int i) {
+int Find(int i) {
     if (subsets[i].parent != i)
-        subsets[i].parent = Find(subsets, subsets[i].parent);
+        subsets[i].parent = Find(subsets[i].parent);
     return subsets[i].parent;
 }
 
 /*Função que realiza a conexão de dois vértices,
 usada para evitar ciclos
 */ 
-void Union(struct Subset subsets[], int x, int y) {
-    int root1 = Find(subsets, x);
-    int root2 = Find(subsets, y);
+void Union(int x, int y) {
+    int root1 = Find(x);
+    int root2 = Find(y);
 
     if (subsets[root1].rank < subsets[root2].rank)
         subsets[root1].parent = root2;
@@ -55,12 +58,11 @@ int compareEdges(const void* x, const void* y) {
 se não, seu peso é somado a mst.
 @int mst: contador da arvore geradora minima 
 */ 
-void kruskal(struct Edge* graph, int V, int E) {
+void kruskal(int V, int E) {
     int mstWeight = 0; 
     int i;
-    int x,y;
-    struct Subset* subsets = (struct Subset*)malloc(V * sizeof(struct Subset));
-    qsort(graph, E, sizeof(struct Edge), compareEdges);
+    int x, y;
+    qsort(edges, E, sizeof(struct Edge), compareEdges);
 
     for (i = 0; i < V; ++i) {
         subsets[i].parent = i;
@@ -68,18 +70,17 @@ void kruskal(struct Edge* graph, int V, int E) {
     }
 
     for (i = 0; i < E; ++i) {
-        x = Find(subsets, graph[i].From);
-        y = Find(subsets, graph[i].To);
+        x = Find(edges[i].From);
+        y = Find(edges[i].To);
         if (x != y) {
             printf("Aresta %d-%d de peso: %d incluida na MST\n",
-                   graph[i].From, graph[i].To, graph[i].weight);
-            mstWeight += graph[i].weight;
-            Union(subsets, x, y);
+                   edges[i].From, edges[i].To, edges[i].weight);
+            mstWeight += edges[i].weight;
+            Union(x, y);
         }
     }
 
     printf("Weight of MST: %d\n", mstWeight);
-    free(subsets);
 }
 
 int main() {
@@ -88,15 +89,17 @@ int main() {
     scanf("%d%d", &V, &E);
     printf("\n");
 
-    struct Edge* graph = createGraph(V, E);
+    subsets = (struct Subset*)malloc(V * sizeof(struct Subset));
+    edges = createGraph(E);
 
     for (int i = 0; i < E; ++i) {
-        scanf("%d%d%d", &graph[i].From, &graph[i].To, &graph[i].weight);
+        scanf("%d%d%d", &edges[i].From, &edges[i].To, &edges[i].weight);
     }
 
-    kruskal(graph, V, E);
+    kruskal(V, E);
 
-    free(graph);
+    free(subsets);
+    free(edges);
 
     return 0;
 }
